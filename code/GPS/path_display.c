@@ -1,15 +1,7 @@
 /**
  * @file path_display.c
- * @brief 路径显示模块
- * @author 贾维斯
- * @date 2026-03-21
- * @version 1.0
- *
- * @details 本模块提供路径数据的显示功能，包括：
- *          - 实时路径显示
- *          - 路径轨迹绘制
- *          - 统计信息显示
- *          与现有的display_gps模块集成
+ * @brief Cleaned module header to avoid encoding issues.
+ * @author JX116
  */
 
 #include "path_recorder.h"
@@ -17,28 +9,23 @@
 #include "zf_device_ips200.h"
 
 //--------------------------------------------------------------------------------------------------
-// 常量定义
 //--------------------------------------------------------------------------------------------------
 
-/** @brief 显示区域定义 */
 #define DISPLAY_AREA_X          10
 #define DISPLAY_AREA_Y          10
 #define DISPLAY_AREA_WIDTH      300
 #define DISPLAY_AREA_HEIGHT     220
 
-/** @brief 颜色定义 */
 #define PATH_LINE_COLOR         RGB565_BLUE
 #define PATH_POINT_COLOR        RGB565_RED
 #define CURRENT_POS_COLOR       RGB565_GREEN
 #define TEXT_COLOR              RGB565_WHITE
 #define BACKGROUND_COLOR        RGB565_BLACK
 
-/** @brief 点半径 */
 #define POINT_RADIUS            3
 #define CURRENT_POS_RADIUS      5
 
 //--------------------------------------------------------------------------------------------------
-// 静态变量
 //--------------------------------------------------------------------------------------------------
 
 static uint8 display_initialized = 0;
@@ -48,15 +35,12 @@ static uint16 display_width = DISPLAY_AREA_WIDTH;
 static uint16 display_height = DISPLAY_AREA_HEIGHT;
 
 //--------------------------------------------------------------------------------------------------
-// 函数实现
 //--------------------------------------------------------------------------------------------------
 
 /**
- * @brief 初始化路径显示
  */
 void path_display_init(void)
 {
-    // 初始化GPS显示模块
     user_gps_display_init(SCREEN_IPS200_PARALLEL8, 
                          display_x, display_y, 
                          display_width, display_height);
@@ -65,8 +49,6 @@ void path_display_init(void)
 }
 
 /**
- * @brief 显示路径轨迹
- * @param color 轨迹颜色
  */
 void path_display_trajectory(uint16 color)
 {
@@ -75,7 +57,6 @@ void path_display_trajectory(uint16 color)
         return;
     }
     
-    // 将路径点转换为GPS点格式
     gps_point gps_points[MAX_PATH_POINTS];
     
     for (uint16 i = 0; i < path_data.point_count; i++)
@@ -84,13 +65,11 @@ void path_display_trajectory(uint16 color)
         gps_points[i].lon = path_data.points[i].longitude;
     }
     
-    // 使用现有的GPS显示功能
     user_gps_transition(gps_points, path_data.point_count);
     user_gps_display(color);
 }
 
 /**
- * @brief 显示当前路径状态
  */
 void path_display_status(void)
 {
@@ -99,31 +78,28 @@ void path_display_status(void)
         return;
     }
     
-    // 清空状态显示区域
 //    ips200_fill_rect(display_x, display_y + display_height + 5,
 //                    display_width, 50, BACKGROUND_COLOR);
     
-    // 显示状态信息
     uint16 y_offset = display_y + display_height + 10;
     
-    // 显示状态
     char status_str[32];
     switch (path_data.state)
     {
         case PATH_STATE_IDLE:
-            strcpy(status_str, "状态: 空闲");
+            strcpy(status_str, "状态: 锟斤拷锟斤拷");
             break;
         case PATH_STATE_RECORDING:
-            strcpy(status_str, "状态: 记录中");
+            strcpy(status_str, "状态: 锟斤拷录锟斤拷");
             break;
         case PATH_STATE_PAUSED:
-            strcpy(status_str, "状态: 暂停");
+            strcpy(status_str, "状态: 锟斤拷停");
             break;
         case PATH_STATE_PLAYBACK:
-            strcpy(status_str, "状态: 回放");
+            strcpy(status_str, "状态: 锟截凤拷");
             break;
         case PATH_STATE_COMPLETED:
-            strcpy(status_str, "状态: 完成");
+            strcpy(status_str, "状态: 锟斤拷锟?);
             break;
         default:
             strcpy(status_str, "状态: 未知");
@@ -132,12 +108,10 @@ void path_display_status(void)
     
     ips200_show_string(display_x, y_offset, status_str);
     
-    // 显示点数
     char point_str[32];
-    sprintf(point_str, "点数: %d/%d", path_data.point_count, MAX_PATH_POINTS);
+    sprintf(point_str, "锟斤拷锟斤拷: %d/%d", path_data.point_count, MAX_PATH_POINTS);
     ips200_show_string(display_x, y_offset + 20, point_str);
     
-    // 显示距离和时间
     float total_distance;
     uint32 total_time;
     float avg_speed;
@@ -145,20 +119,19 @@ void path_display_status(void)
     path_recorder_get_stats(&total_distance, &total_time, &avg_speed);
     
     char distance_str[32];
-    sprintf(distance_str, "距离: %.1fm", total_distance);
+    sprintf(distance_str, "锟斤拷锟斤拷: %.1fm", total_distance);
     ips200_show_string(display_x + 120, y_offset, distance_str);
     
     char time_str[32];
-    sprintf(time_str, "时间: %ds", (int)total_time);
+    sprintf(time_str, "时锟斤拷: %ds", (int)total_time);
     ips200_show_string(display_x + 120, y_offset + 20, time_str);
     
     char speed_str[32];
-    sprintf(speed_str, "均速: %.1fkm/h", avg_speed);
+    sprintf(speed_str, "锟斤拷锟斤拷: %.1fkm/h", avg_speed);
     ips200_show_string(display_x + 120, y_offset + 40, speed_str);
 }
 
 /**
- * @brief 显示当前GPS位置
  */
 void path_display_current_position(void)
 {
@@ -167,32 +140,27 @@ void path_display_current_position(void)
         return;
     }
     
-    // 将当前GPS位置转换为屏幕坐标
     gps_point current_gps;
-    current_gps.lat = (double)gnss.latitude;  // display_gps使用double类型
+    current_gps.lat = (double)gnss.latitude;  // display_gps使锟斤拷double锟斤拷锟斤拷
     current_gps.lon = (double)gnss.longitude;
     
     gps_point gps_points[2];
     gps_points[0] = current_gps;
-    gps_points[1] = current_gps;  // 需要至少2个点
+    gps_points[1] = current_gps;  // 锟斤拷要锟斤拷锟斤拷2锟斤拷锟斤拷
     
     user_gps_transition(gps_points, 2);
     
-    // 绘制当前位置
     if (screen_point_data[0].x > 0 && screen_point_data[0].y > 0)
     {
         // uint16 x = (uint16)(screen_point_data[0].x + display_x);
         // uint16 y = (uint16)(screen_point_data[0].y + display_y);
         
-        // 绘制当前位置点
 //        ips200_INS_flash_draw_circle(x, y, CURRENT_POS_RADIUS, CURRENT_POS_COLOR);
         
-        // 显示位置信息
         char pos_str[64];
         sprintf(pos_str, "Lat:%.6f Lon:%.6f", gnss.latitude, gnss.longitude);
         ips200_show_string(display_x, display_y - 20, pos_str);
         
-        // 显示卫星信息
         char sat_str[32];
         sprintf(sat_str, "SAT:%d SPD:%.1f", gnss.satellite_used, gnss.speed);
         ips200_show_string(display_x, display_y - 40, sat_str);
@@ -200,7 +168,6 @@ void path_display_current_position(void)
 }
 
 /**
- * @brief 显示路径控制界面
  */
 void path_display_control_ui(void)
 {
@@ -209,29 +176,27 @@ void path_display_control_ui(void)
         return;
     }
     
-    // 清空控制界面区域
     uint16 control_y = display_y + display_height + 60;
 //    ips200_fill_rect(display_x, control_y, display_width, 40, BACKGROUND_COLOR);
     
-    // 显示控制提示
     char control_str[64];
     
     switch (path_data.state)
     {
         case PATH_STATE_IDLE:
-            strcpy(control_str, "按A开始记录");
+            strcpy(control_str, "锟斤拷A锟斤拷始锟斤拷录");
             break;
         case PATH_STATE_RECORDING:
-            strcpy(control_str, "按B暂停 按C停止");
+            strcpy(control_str, "锟斤拷B锟斤拷停 锟斤拷C停止");
             break;
         case PATH_STATE_PAUSED:
-            strcpy(control_str, "按A恢复 按C停止");
+            strcpy(control_str, "锟斤拷A锟街革拷 锟斤拷C停止");
             break;
         case PATH_STATE_COMPLETED:
-            strcpy(control_str, "按D回放 按E清除");
+            strcpy(control_str, "锟斤拷D锟截凤拷 锟斤拷E锟斤拷锟?);
             break;
         case PATH_STATE_PLAYBACK:
-            strcpy(control_str, "按F停止回放");
+            strcpy(control_str, "锟斤拷F停止锟截凤拷");
             break;
         default:
             strcpy(control_str, "");
@@ -242,7 +207,6 @@ void path_display_control_ui(void)
 }
 
 /**
- * @brief 完整路径显示更新
  */
 void path_display_update(void)
 {
@@ -251,25 +215,18 @@ void path_display_update(void)
         return;
     }
     
-    // 清空显示区域
 //    ips200_fill_rect(display_x, display_y, display_width, display_height, BACKGROUND_COLOR);
     
-    // 显示路径轨迹
     path_display_trajectory(PATH_LINE_COLOR);
     
-    // 显示当前位置
     path_display_current_position();
     
-    // 显示状态信息
     path_display_status();
     
-    // 显示控制界面
     path_display_control_ui();
 }
 
 /**
- * @brief 显示路径回放
- * @param point_index 要显示的点索引
  */
 void path_display_playback_point(uint16 point_index)
 {
@@ -278,13 +235,10 @@ void path_display_playback_point(uint16 point_index)
         return;
     }
     
-    // 清空显示区域
 //    ips200_fill_rect(display_x, display_y, display_width, display_height, BACKGROUND_COLOR);
     
-    // 显示完整轨迹
     path_display_trajectory(PATH_LINE_COLOR);
     
-    // 显示回放点
     gps_point playback_gps;
     playback_gps.lat = path_data.points[point_index].latitude;
     playback_gps.lon = path_data.points[point_index].longitude;
@@ -300,30 +254,22 @@ void path_display_playback_point(uint16 point_index)
         // uint16 x = (uint16)(screen_point_data[0].x + display_x);
         // uint16 y = (uint16)(screen_point_data[0].y + display_y);
         
-        // 绘制回放点
 //        ips200_INS_flash_draw_circle(x, y, CURRENT_POS_RADIUS, RGB565_YELLOW);
         
-        // 显示回放信息
         char playback_str[64];
-        sprintf(playback_str, "回放: %d/%d", point_index + 1, path_data.point_count);
+        sprintf(playback_str, "锟截凤拷: %d/%d", point_index + 1, path_data.point_count);
         ips200_show_string(display_x, display_y - 20, playback_str);
         
         char time_str[32];
         uint32 seconds = path_data.points[point_index].timestamp / 1000;
-        sprintf(time_str, "时间: %ds", (int)seconds);
+        sprintf(time_str, "时锟斤拷: %ds", (int)seconds);
         ips200_show_string(display_x, display_y - 40, time_str);
     }
     
-    // 显示状态信息
     path_display_status();
 }
 
 /**
- * @brief 设置显示区域
- * @param x X坐标
- * @param y Y坐标
- * @param width 宽度
- * @param height 高度
  */
 void path_display_set_area(uint16 x, uint16 y, uint16 width, uint16 height)
 {
@@ -332,16 +278,10 @@ void path_display_set_area(uint16 x, uint16 y, uint16 width, uint16 height)
     display_width = width;
     display_height = height;
     
-    // 重新初始化显示
     user_gps_display_init(SCREEN_IPS200_PARALLEL8, x, y, width, height);
 }
 
 /**
- * @brief 获取显示区域
- * @param[out] x X坐标
- * @param[out] y Y坐标
- * @param[out] width 宽度
- * @param[out] height 高度
  */
 void path_display_get_area(uint16* x, uint16* y, uint16* width, uint16* height)
 {

@@ -55,7 +55,7 @@ void Beep_Ring(uint16_t Time)
 * @param : void
 * @return: void
 * @date  : 2024年11月6日12:24:04
-* @author: SJX
+* @author: JX116
 ************************************************/
 void Beep_Timer_ShortRing(void)
 {
@@ -79,7 +79,7 @@ void Beep_Timer_ShortRing_Stop(void)
 * @param : void
 * @return: void
 * @date  : 2024年11月6日12:24:04
-* @author: SJX
+* @author: JX116
 ************************************************/
 void Key_Timer_ShortRing(void)
 {
