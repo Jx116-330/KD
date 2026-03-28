@@ -1,245 +1,115 @@
 /**
  * @file display_gps.c
- * @brief Cleaned module header to avoid encoding issues.
+ * @brief GPS坐标转换与显示模块实现
  * @author JX116
+ * @date 2026-03-21
+ * @version 1.0
+ *
+ * @details 实现：
+ *          - 经纬度到本地XY坐标转换
+ *          - XY坐标到屏幕坐标映射
+ *          - 轨迹点与当前位置绘制支持
  */
 
 #include <GPS/display_gps.h>
 
+/** @brief 显示区域起始X坐标 */
 static int16 display_start_x = 0;
-
+/** @brief 显示区域起始Y坐标 */
 static int16 display_start_y = 0;
-
+/** @brief 显示区域宽度 */
 static int16 display_width = 0;
-
+/** @brief 显示区域高度 */
 static int16 display_high = 0;
-
-static int16 transition_point_num   = 0;
-
-static screen_type_enum display_screen_type = SCREEN_IPS200_SPI;
-
-
-plane_point plane_point_data[DISPLAY_POINT_MAX];
+/** @brief 当前转换后的点数量 */
+static int16 transition_point_num = 0;
 
 screen_point screen_point_data[DISPLAY_POINT_MAX];
 
-gps_point gps_point_data[DISPLAY_POINT_MAX]={
-    {10.0, 10.0},  /**< ���Ե�1: γ��10.0��, ����10.0�� */
-    {20.0, 20.0},  /**< ���Ե�2: γ��20.0��, ����20.0�� */
-    {10.0, 20.0}   /**< ���Ե�3: γ��10.0��, ����20.0�� */
-};
-
-/**
- *
- *
- */
-static void spherical_to_plane(gps_point *gps_point_input)
+void gps_to_xy(gps_point *gps, double *x, double *y)
 {
-    double meters_per_degree_lat = 0;  /**< γ��ÿ�ȶ�Ӧ������ */
-    double meters_per_degree_lon = 0;  /**< ����ÿ�ȶ�Ӧ������ */
+    int i;
+    double ref_lat = gps[0].lat * USER_PI / 180.0;
+    double ref_lon = gps[0].lon * USER_PI / 180.0;
 
-    if(transition_point_num > 1)
+    for (i = 0; i < transition_point_num; i++)
     {
-        meters_per_degree_lat = (USER_PI / 180.0) * EARTH_RADIUS;
+        double lat = gps[i].lat * USER_PI / 180.0;
+        double lon = gps[i].lon * USER_PI / 180.0;
 
-        meters_per_degree_lon = meters_per_degree_lat * cos(gps_point_input[0].lat * USER_PI / 180.0);
-
-        for (int i = 1; i < transition_point_num; i++)
-        {
-            plane_point_data[i].x = (gps_point_input[i].lon - gps_point_input[0].lon) * meters_per_degree_lon;
-
-            plane_point_data[i].y = (gps_point_input[i].lat - gps_point_input[0].lat) * meters_per_degree_lat;
-        }
-    }
-}
-/**
- *
- *
- */
-static void plane_to_screen(void)
-{
-    double min_x = plane_point_data[0].x;  /**< ��СX���� */
-    double max_x = plane_point_data[0].x;  /**< ���X���� */
-    double min_y = plane_point_data[0].y;  /**< ��СY���� */
-    double max_y = plane_point_data[0].y;  /**< ���Y���� */
-
-    double width   = 0.0f;   /**< ���귶Χ���� */
-    double height  = 0.0f;   /**< ���귶Χ�߶� */
-    double scale_x = 0.0f;   /**< X�������ű��� */
-    double scale_y = 0.0f;   /**< Y�������ű��� */
-    double scale   = 0.0f;   /**< �������ű�����ȡ��Сֵ�����ݺ�ȣ�?*/
-
-    double x_offset = 0.0;   /**< X����ƫ���������ھ��У� */
-    double y_offset = 0.0;   /**< Y����ƫ���������ھ��У� */
-
-    if(transition_point_num > 1)
-    {
-        for (int i = 1; i < transition_point_num; i++)
-        {
-            min_x = fmin(min_x, plane_point_data[i].x);
-            max_x = fmax(max_x, plane_point_data[i].x);
-            min_y = fmin(min_y, plane_point_data[i].y);
-            max_y = fmax(max_y, plane_point_data[i].y);
-        }
-
-        if (max_x - min_x > EPSILON && max_y - min_y > EPSILON)
-        {
-            width = max_x - min_x;   /* ���귶Χ���� */
-            height = max_y - min_y;  /* ���귶Χ�߶� */
-
-            scale_x = (double)display_width / width;
-            scale_y = (double)display_high / height;
-            scale = fmin(scale_x, scale_y);  /* ȡ��Сֵ�����ݺ��?*/
-
-            if (scale == scale_x)  /* ���X�����ȴﵽ�߽� */
-            {
-                y_offset = ((double)display_high - height * scale) / 2.0;
-            }
-            else  /* ���Y�����ȴﵽ�߽� */
-            {
-                x_offset = ((double)display_width - width * scale) / 2.0;
-            }
-
-            for (int i = 0; i < transition_point_num; i++)
-            {
-                screen_point_data[i].x = (plane_point_data[i].x - min_x) * scale + x_offset;
-
-                screen_point_data[i].y = (double)display_high - ((plane_point_data[i].y - min_y) * scale + y_offset);
-            }
-        }
+        x[i] = EARTH_RADIUS * (lon - ref_lon) * cos(ref_lat);
+        y[i] = EARTH_RADIUS * (lat - ref_lat);
     }
 }
 
-/**
- *
- *
- */
-void user_gps_transition(gps_point *gps_point_input, int16 point_num)
+void xy_to_screen(double *x, double *y, int point_num)
 {
-    zf_assert(point_num < DISPLAY_POINT_MAX);
+    int i;
+    double min_x = x[0], max_x = x[0];
+    double min_y = y[0], max_y = y[0];
+    double scale_x, scale_y, scale;
 
-    transition_point_num = point_num;
-
-    memset(plane_point_data, 0, sizeof(plane_point_data));
-
-    memset(screen_point_data, 0, sizeof(screen_point_data));
-
-    spherical_to_plane(gps_point_input);
-
-    plane_to_screen();
-}
-
-/**
- *
- *
- */
-void user_gps_display(uint16 display_color)
-{
-    for(int i = 0; i < (transition_point_num - 1); i++)
+    for (i = 1; i < point_num; i++)
     {
-        switch(display_screen_type)
-        {
-            case SCREEN_IPS114:
-            {
-                ips114_draw_line((uint16)screen_point_data[i].x  + display_start_x,
-                                 (uint16)screen_point_data[i].y  + display_start_y,
-                                 (uint16)screen_point_data[i + 1].x + display_start_x,
-                                 (uint16)screen_point_data[i + 1].y + display_start_y,
-                                 display_color);
-            }
-            break;
+        if (x[i] < min_x) min_x = x[i];
+        if (x[i] > max_x) max_x = x[i];
+        if (y[i] < min_y) min_y = y[i];
+        if (y[i] > max_y) max_y = y[i];
+    }
 
-            case SCREEN_IPS200_SPI:
-            case SCREEN_IPS200_PARALLEL8:
-            {
-                ips200_draw_line((uint16)screen_point_data[i].x  + display_start_x,
-                                 (uint16)screen_point_data[i].y  + display_start_y,
-                                 (uint16)screen_point_data[i + 1].x + display_start_x,
-                                 (uint16)screen_point_data[i + 1].y + display_start_y,
-                                 display_color);
-            }
-            break;
+    if (fabs(max_x - min_x) < EPSILON) max_x = min_x + 1.0;
+    if (fabs(max_y - min_y) < EPSILON) max_y = min_y + 1.0;
 
-            case SCREEN_TFT180:
-            {
-                tft180_draw_line((uint16)screen_point_data[i].x    + display_start_x,
-                                (uint16)screen_point_data[i].y    + display_start_y,
-                                (uint16)screen_point_data[i+1].x  + display_start_x,
-                                (uint16)screen_point_data[i+1].y  + display_start_y,
-                                display_color);
-            }
-            break;
-        }
+    scale_x = (display_width - 10.0) / (max_x - min_x);
+    scale_y = (display_high - 10.0) / (max_y - min_y);
+    scale = (scale_x < scale_y) ? scale_x : scale_y;
+
+    for (i = 0; i < point_num; i++)
+    {
+        double screen_x = (x[i] - min_x) * scale + display_start_x + 5;
+        double screen_y = display_start_y + display_high - 5 - ((y[i] - min_y) * scale);
+
+        if (screen_x > 32767.0) screen_x = 32767.0;
+        if (screen_x < -32768.0) screen_x = -32768.0;
+        if (screen_y > 32767.0) screen_y = 32767.0;
+        if (screen_y < -32768.0) screen_y = -32768.0;
+
+        screen_point_data[i].x = (int16)screen_x;
+        screen_point_data[i].y = (int16)screen_y;
     }
 }
 
-/**
- *
- *
- */
-void user_gps_display_init(screen_type_enum screen_type, int16 start_x, int16 start_y, int16 width, int16 high)
+void get_transition(gps_point *gps, int point_num)
 {
-    display_start_x = start_x;
-    display_start_y = start_y;
+    double x[DISPLAY_POINT_MAX];
+    double y[DISPLAY_POINT_MAX];
 
-    display_width = width - 1;
-    display_high = high - 1;
+    if (point_num <= 0) return;
+    if (point_num > DISPLAY_POINT_MAX) point_num = DISPLAY_POINT_MAX;
+    if (point_num > 32767) point_num = 32767;
 
-    display_screen_type = screen_type;
+    transition_point_num = (int16)point_num;
+    gps_to_xy(gps, x, y);
+    xy_to_screen(x, y, point_num);
 }
 
-
-/**
- *
- *
- */
-void ips200_draw_circle(uint16 x_center, uint16 y_center, uint16 radius, const uint16 color)
+void user_gps_transition(gps_point *gps, int point_num)
 {
-    zf_assert(x_center < ips200_width_max);
-    zf_assert(y_center < ips200_height_max);
-    zf_assert(radius > 0);
+    display_start_x = 0;
+    display_start_y = 0;
+    display_width = 220;
+    display_high = 120;
+    get_transition(gps, point_num);
+}
 
-    int x = 0;              /**< ��ǰX���꣨��0��ʼ�� */
-    int y = radius;         /**< ��ǰY���꣨�Ӱ뾶��ʼ�� */
-    int d = 3 - 2 * radius; /**< Bresenham���߲�����ʼ�� */
-
-    while (x <= y)
+void screen_print_gps_point(void)
+{
+    int i;
+    for (i = 0; i < transition_point_num; i++)
     {
-        ips200_draw_point(x_center + x + display_start_x, y_center + y + display_start_y, color);
-        ips200_draw_point(x_center + y + display_start_x, y_center + x + display_start_y, color);
-
-        ips200_draw_point(x_center - x + display_start_x, y_center + y + display_start_y, color);
-        ips200_draw_point(x_center - y + display_start_x, y_center + x + display_start_y, color);
-
-        ips200_draw_point(x_center - x + display_start_x, y_center - y + display_start_y, color);
-        ips200_draw_point(x_center - y + display_start_x, y_center - x + display_start_y, color);
-
-        ips200_draw_point(x_center + x + display_start_x, y_center - y + display_start_y, color);
-        ips200_draw_point(x_center + y + display_start_x, y_center - x + display_start_y, color);
-
-        if (d < 0)
+        if (screen_point_data[i].x >= 0 && screen_point_data[i].y >= 0)
         {
-            d += 4 * x + 6;
+            ips200_draw_point((uint16)screen_point_data[i].x, (uint16)screen_point_data[i].y, RGB565_RED);
         }
-        else
-        {
-            d += 4 * (x - y) + 10;
-            y--;
-        }
-        x++;
     }
-}
-
-/**
- *
- *
- */
-void gps_display(gps_point *gps_point_data, int16 point_num, uint16 x, uint16 y,
-                 int16 R, const uint16 line_color, const uint16 point_color)
-{
-    user_gps_transition(gps_point_data, point_num);
-
-    user_gps_display(line_color);
-
-    ips200_draw_circle(x, y, R, point_color);
 }

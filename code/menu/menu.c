@@ -1,3 +1,10 @@
+/*********************************************************************************************************************
+* File: menu.c
+* Brief: 菜单系统实现文件。
+* Author: JX116
+* Note: 负责菜单绘制、编码器/按键交互、GPS子菜单状态显示与参数保存逻辑。
+*********************************************************************************************************************/
+
 #include "menu.h"
 #include "zf_device_ips200.h"
 #include "zf_common_headfile.h"
@@ -7,6 +14,7 @@
 #include "MyEncoder.h"
 
 
+/* 参数结构体：用于保存 PID 和阈值等菜单参数 */
 typedef struct {
     float pid_p;
     float pid_i;
@@ -18,11 +26,13 @@ typedef struct {
 
 MyParams_t g_params;
 
+/* Flash 参数保存位置定义 */
 #define FLASH_SECTOR    0
 #define FLASH_PAGE      127
 #define MAGIC_NUM       0x5A5A5A5A
 #define SAVE_LEN        ((sizeof(MyParams_t) + 3) / 4)
 
+/* 菜单显示与状态控制变量 */
 static uint8 menu_needs_update = 1;
 static uint16 current_font_color = RGB565_WHITE;
 static int current_selection = 0;
@@ -38,6 +48,7 @@ static uint8 gps_display_mode = 0;
 static char gps_status_hint[64] = "";
 MenuPage *current_page = NULL;
 
+/* 设置默认参数，防止首次上电或 Flash 无效时没有有效配置 */
 void params_set_default(void)
 {
     g_params.pid_p = 1.2f;
@@ -48,6 +59,7 @@ void params_set_default(void)
     g_params.magic_code = MAGIC_NUM;
 }
 
+/* 通用参数增减函数：按步长调整，并限制上下界 */
 void adjust_param(float *ptr, float step, float min, float max, uint8_t is_add)
 {
     if (is_add)
@@ -79,6 +91,7 @@ void action_test_inc(void)
     adjust_param(&g_params.pid_p, 0.1f, 0.0f, 20.0f, 1);
 }
 
+/* 将当前菜单参数写入 Flash */
 void Action_Save_Params(void)
 {
     ips200_show_string(30, 100, "Saving...");
@@ -89,6 +102,7 @@ void Action_Save_Params(void)
     system_delay_ms(500);
 }
 
+/* 上电时从 Flash 读取参数；若无效则加载默认值 */
 void Init_Load_Params(void)
 {
     MyParams_t temp_read;
@@ -105,6 +119,7 @@ void Init_Load_Params(void)
     }
 }
 
+/* GPS 动态区域绘制：根据模式显示状态信息或轨迹图 */
 static void gps_dynamic_draw(uint16 x, uint16 y, uint16 w, uint16 h)
 {
     static uint32 last_refresh_ms = 0;
@@ -169,6 +184,7 @@ static void gps_dynamic_draw(uint16 x, uint16 y, uint16 w, uint16 h)
     ips200_show_string(x, y + 72, line4);
 }
 
+/* GPS 菜单项：显示当前 GPS 状态数据 */
 static void gps_action_display_data(void)
 {
     gps_display_mode = 1;
@@ -179,6 +195,7 @@ static void gps_action_display_data(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：开始或停止轨迹记录 */
 static void gps_action_toggle_record(void)
 {
     path_state_enum state = path_recorder_get_state();
@@ -215,6 +232,7 @@ static void gps_action_toggle_record(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：进入轨迹显示模式 */
 static void gps_action_map(void)
 {
     gps_display_mode = 2;
@@ -227,6 +245,7 @@ static void gps_action_map(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：手动保存当前 GPS 点 */
 static void gps_action_save_current_point(void)
 {
     path_point_t point;
@@ -263,6 +282,7 @@ static void gps_action_save_current_point(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：把当前点加入轨迹并立即进入地图显示 */
 static void gps_action_current_map(void)
 {
     path_point_t point;
@@ -301,6 +321,7 @@ static void gps_action_current_map(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：清空当前记录点 */
 static void gps_action_clear_points(void)
 {
     path_recorder_clear();
@@ -312,6 +333,7 @@ static void gps_action_clear_points(void)
     menu_full_redraw = 1;
 }
 
+/* GPS 菜单项：保存当前路径到 Flash 槽位 */
 static void gps_action_save_path(void)
 {
     if (path_recorder_get_point_count() > 0)
@@ -438,6 +460,7 @@ static void show_string_fit(uint16 x, uint16 y, const char *s)
     ips200_show_string(x, y, buf);
 }
 
+/* 菜单系统初始化：初始化屏幕、按键、编码器、参数与主菜单状态 */
 void menu_init(void)
 {
     ips200_init(IPS200_TYPE_SPI);
@@ -485,6 +508,7 @@ void menu_set_dynamic_clear(uint8 enable)
     menu_dynamic_clear_enable = enable ? 1 : 0;
 }
 
+/* 菜单主任务：处理编码器/按键输入、菜单跳转与界面刷新 */
 void menu_task(void)
 {
     system_delay_ms(10);
