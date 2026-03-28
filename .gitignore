@@ -1,0 +1,30 @@
+# Build output
+Debug/
+Release/
+
+# Eclipse / ADS generated temp files
+*.o
+*.d
+*.mk
+*.opt
+*.map
+*.elf
+*.hex
+*.mdf
+
+# Common temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.swp
+*.swo
+*~
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Optional local config/cache
+.vscode/
