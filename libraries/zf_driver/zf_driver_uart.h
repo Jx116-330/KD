@@ -1,37 +1,37 @@
 /*********************************************************************************************************************
-* TC387 Opensourec Library ¼´£¨TC387 ¿ªÔ´¿â£©ÊÇÒ»¸ö»ùÓÚ¹Ù·½ SDK ½Ó¿ÚµÄµÚÈý·½¿ªÔ´¿â
-* Copyright (c) 2022 SEEKFREE Öð·É¿Æ¼¼
+* TC387 Opensourec Library å³ï¼ˆTC387 å¼€æºåº“ï¼‰æ˜¯ä¸€ä¸ªåŸºäºŽå®˜æ–¹ SDK æŽ¥å£çš„ç¬¬ä¸‰æ–¹å¼€æºåº“
+* Copyright (c) 2022 SEEKFREE é€é£žç§‘æŠ€
 *
-* ±¾ÎÄ¼þÊÇ TC387 ¿ªÔ´¿âµÄÒ»²¿·Ö
+* æœ¬æ–‡ä»¶æ˜¯ TC387 å¼€æºåº“çš„ä¸€éƒ¨åˆ†
 *
-* TC387 ¿ªÔ´¿â ÊÇÃâ·ÑÈí¼þ
-* Äú¿ÉÒÔ¸ù¾Ý×ÔÓÉÈí¼þ»ù½ð»á·¢²¼µÄ GPL£¨GNU General Public License£¬¼´ GNUÍ¨ÓÃ¹«¹²Ðí¿ÉÖ¤£©µÄÌõ¿î
-* ¼´ GPL µÄµÚ3°æ£¨¼´ GPL3.0£©»ò£¨ÄúÑ¡ÔñµÄ£©ÈÎºÎºóÀ´µÄ°æ±¾£¬ÖØÐÂ·¢²¼ºÍ/»òÐÞ¸ÄËü
+* TC387 å¼€æºåº“ æ˜¯å…è´¹è½¯ä»¶
+* æ‚¨å¯ä»¥æ ¹æ®è‡ªç”±è½¯ä»¶åŸºé‡‘ä¼šå‘å¸ƒçš„ GPLï¼ˆGNU General Public Licenseï¼Œå³ GNUé€šç”¨å…¬å…±è®¸å¯è¯ï¼‰çš„æ¡æ¬¾
+* å³ GPL çš„ç¬¬3ç‰ˆï¼ˆå³ GPL3.0ï¼‰æˆ–ï¼ˆæ‚¨é€‰æ‹©çš„ï¼‰ä»»ä½•åŽæ¥çš„ç‰ˆæœ¬ï¼Œé‡æ–°å‘å¸ƒå’Œ/æˆ–ä¿®æ”¹å®ƒ
 *
-* ±¾¿ªÔ´¿âµÄ·¢²¼ÊÇÏ£ÍûËüÄÜ·¢»Ó×÷ÓÃ£¬µ«²¢Î´¶ÔÆä×÷ÈÎºÎµÄ±£Ö¤
-* ÉõÖÁÃ»ÓÐÒþº¬µÄÊÊÏúÐÔ»òÊÊºÏÌØ¶¨ÓÃÍ¾µÄ±£Ö¤
-* ¸ü¶àÏ¸½ÚÇë²Î¼û GPL
+* æœ¬å¼€æºåº“çš„å‘å¸ƒæ˜¯å¸Œæœ›å®ƒèƒ½å‘æŒ¥ä½œç”¨ï¼Œä½†å¹¶æœªå¯¹å…¶ä½œä»»ä½•çš„ä¿è¯
+* ç”šè‡³æ²¡æœ‰éšå«çš„é€‚é”€æ€§æˆ–é€‚åˆç‰¹å®šç”¨é€”çš„ä¿è¯
+* æ›´å¤šç»†èŠ‚è¯·å‚è§ GPL
 *
-* ÄúÓ¦¸ÃÔÚÊÕµ½±¾¿ªÔ´¿âµÄÍ¬Ê±ÊÕµ½Ò»·Ý GPL µÄ¸±±¾
-* Èç¹ûÃ»ÓÐ£¬Çë²ÎÔÄ<https://www.gnu.org/licenses/>
+* æ‚¨åº”è¯¥åœ¨æ”¶åˆ°æœ¬å¼€æºåº“çš„åŒæ—¶æ”¶åˆ°ä¸€ä»½ GPL çš„å‰¯æœ¬
+* å¦‚æžœæ²¡æœ‰ï¼Œè¯·å‚é˜…<https://www.gnu.org/licenses/>
 *
-* ¶îÍâ×¢Ã÷£º
-* ±¾¿ªÔ´¿âÊ¹ÓÃ GPL3.0 ¿ªÔ´Ðí¿ÉÖ¤Ð­Òé ÒÔÉÏÐí¿ÉÉêÃ÷ÎªÒëÎÄ°æ±¾
-* Ðí¿ÉÉêÃ÷Ó¢ÎÄ°æÔÚ libraries/doc ÎÄ¼þ¼ÐÏÂµÄ GPL3_permission_statement.txt ÎÄ¼þÖÐ
-* Ðí¿ÉÖ¤¸±±¾ÔÚ libraries ÎÄ¼þ¼ÐÏÂ ¼´¸ÃÎÄ¼þ¼ÐÏÂµÄ LICENSE ÎÄ¼þ
-* »¶Ó­¸÷Î»Ê¹ÓÃ²¢´«²¥±¾³ÌÐò µ«ÐÞ¸ÄÄÚÈÝÊ±±ØÐë±£ÁôÖð·É¿Æ¼¼µÄ°æÈ¨ÉùÃ÷£¨¼´±¾ÉùÃ÷£©
+* é¢å¤–æ³¨æ˜Žï¼š
+* æœ¬å¼€æºåº“ä½¿ç”¨ GPL3.0 å¼€æºè®¸å¯è¯åè®® ä»¥ä¸Šè®¸å¯ç”³æ˜Žä¸ºè¯‘æ–‡ç‰ˆæœ¬
+* è®¸å¯ç”³æ˜Žè‹±æ–‡ç‰ˆåœ¨ libraries/doc æ–‡ä»¶å¤¹ä¸‹çš„ GPL3_permission_statement.txt æ–‡ä»¶ä¸­
+* è®¸å¯è¯å‰¯æœ¬åœ¨ libraries æ–‡ä»¶å¤¹ä¸‹ å³è¯¥æ–‡ä»¶å¤¹ä¸‹çš„ LICENSE æ–‡ä»¶
+* æ¬¢è¿Žå„ä½ä½¿ç”¨å¹¶ä¼ æ’­æœ¬ç¨‹åº ä½†ä¿®æ”¹å†…å®¹æ—¶å¿…é¡»ä¿ç•™é€é£žç§‘æŠ€çš„ç‰ˆæƒå£°æ˜Žï¼ˆå³æœ¬å£°æ˜Žï¼‰
 *
-* ÎÄ¼þÃû³Æ          zf_driver_uart
-* ¹«Ë¾Ãû³Æ          ³É¶¼Öð·É¿Æ¼¼ÓÐÏÞ¹«Ë¾
-* °æ±¾ÐÅÏ¢          ²é¿´ libraries/doc ÎÄ¼þ¼ÐÄÚ version ÎÄ¼þ °æ±¾ËµÃ÷
-* ¿ª·¢»·¾³          ADS v1.10.2
-* ÊÊÓÃÆ½Ì¨          TC387QP
-* µêÆÌÁ´½Ó          https://seekfree.taobao.com/
+* æ–‡ä»¶åç§°          zf_driver_uart
+* å…¬å¸åç§°          æˆéƒ½é€é£žç§‘æŠ€æœ‰é™å…¬å¸
+* ç‰ˆæœ¬ä¿¡æ¯          æŸ¥çœ‹ libraries/doc æ–‡ä»¶å¤¹å†… version æ–‡ä»¶ ç‰ˆæœ¬è¯´æ˜Ž
+* å¼€å‘çŽ¯å¢ƒ          ADS v1.10.2
+* é€‚ç”¨å¹³å°          TC387QP
+* åº—é“ºé“¾æŽ¥          https://seekfree.taobao.com/
 *
-* ÐÞ¸Ä¼ÇÂ¼
-* ÈÕÆÚ              ×÷Õß                ±¸×¢
+* ä¿®æ”¹è®°å½•
+* æ—¥æœŸ              ä½œè€…                å¤‡æ³¨
 * 2022-11-04       pudding            first version
-* 2023-10-10       pudding            ÐÂÔö´®¿Ú4-´®¿Ú11
+* 2023-10-10       pudding            æ–°å¢žä¸²å£4-ä¸²å£11
 ********************************************************************************************************************/
 
 #ifndef _zf_driver_uart_h_
@@ -41,14 +41,14 @@
 #include "zf_common_typedef.h"
 
 
-typedef enum            // Ã¶¾Ù´®¿ÚÒý½Å ´ËÃ¶¾Ù¶¨Òå²»ÔÊÐíÓÃ»§ÐÞ¸Ä
+typedef enum            // æžšä¸¾ä¸²å£å¼•è„š æ­¤æžšä¸¾å®šä¹‰ä¸å…è®¸ç”¨æˆ·ä¿®æ”¹
 {
-    UART0_TX_P14_0,     // ´®¿Ú0 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART0_TX_P14_0,     // ä¸²å£0 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART0_TX_P14_1,
     UART0_TX_P15_2,
     UART0_TX_P15_3,
 
-    UART1_TX_P02_2,     // ´®¿Ú1 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART1_TX_P02_2,     // ä¸²å£1 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART1_TX_P11_12,
     UART1_TX_P15_0,
     UART1_TX_P15_1,
@@ -58,84 +58,84 @@ typedef enum            // Ã¶¾Ù´®¿ÚÒý½Å ´ËÃ¶¾Ù¶¨Òå²»ÔÊÐíÓÃ»§ÐÞ¸Ä
     UART1_TX_P33_12,
     UART1_TX_P33_13,
 
-    UART2_TX_P02_0,     // ´®¿Ú2 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART2_TX_P02_0,     // ä¸²å£2 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART2_TX_P10_5,
     UART2_TX_P14_2,
     UART2_TX_P14_3,
     UART2_TX_P33_8,
     UART2_TX_P33_9,
 
-    UART3_TX_P00_0,     // ´®¿Ú3 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART3_TX_P00_0,     // ä¸²å£3 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART3_TX_P00_1,
     UART3_TX_P15_6,
     UART3_TX_P15_7,
     UART3_TX_P20_0,
     UART3_TX_P20_3,
     UART3_TX_P21_7,
-    UART4_TX_P00_9,     // ´®¿Ú4 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART4_TX_P00_9,     // ä¸²å£4 å‘é€å¼•è„šå¯é€‰èŒƒå›´
 
-    UART5_TX_P00_7,     // ´®¿Ú5 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART5_TX_P00_7,     // ä¸²å£5 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART5_TX_P22_2,
 
-    UART6_TX_P22_0,     // ´®¿Ú6 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART6_TX_P22_0,     // ä¸²å£6 å‘é€å¼•è„šå¯é€‰èŒƒå›´
 
-    UART8_TX_P33_7,     // ´®¿Ú8 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART8_TX_P33_7,     // ä¸²å£8 å‘é€å¼•è„šå¯é€‰èŒƒå›´
 
-    UART9_TX_P20_7,     // ´®¿Ú9 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART9_TX_P20_7,     // ä¸²å£9 å‘é€å¼•è„šå¯é€‰èŒƒå›´
 
-    UART10_TX_P00_8,    // ´®¿Ú10 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART10_TX_P00_8,    // ä¸²å£10 å‘é€å¼•è„šå¯é€‰èŒƒå›´
     UART10_TX_P13_0,
 
-    UART11_TX_P21_5,    // ´®¿Ú11 ·¢ËÍÒý½Å¿ÉÑ¡·¶Î§
+    UART11_TX_P21_5,    // ä¸²å£11 å‘é€å¼•è„šå¯é€‰èŒƒå›´
 }uart_tx_pin_enum;
 
 
-typedef enum            // Ã¶¾Ù´®¿ÚÒý½Å ´ËÃ¶¾Ù¶¨Òå²»ÔÊÐíÓÃ»§ÐÞ¸Ä
+typedef enum            // æžšä¸¾ä¸²å£å¼•è„š æ­¤æžšä¸¾å®šä¹‰ä¸å…è®¸ç”¨æˆ·ä¿®æ”¹
 {
 
-    UART0_RX_P14_1,     // ´®¿Ú0 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART0_RX_P14_1,     // ä¸²å£0 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART0_RX_P15_3,
 
-    UART1_RX_P02_3,     // ´®¿Ú1 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART1_RX_P02_3,     // ä¸²å£1 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART1_RX_P11_10,
     UART1_RX_P15_1,
     UART1_RX_P15_5,
     UART1_RX_P20_9,
     UART1_RX_P33_13,
 
-    UART2_RX_P02_0,     // ´®¿Ú2 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART2_RX_P02_0,     // ä¸²å£2 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART2_RX_P02_1,
     UART2_RX_P10_6,
     UART2_RX_P14_3,
     UART2_RX_P33_8,
 
-    UART3_RX_P00_1,     // ´®¿Ú3 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART3_RX_P00_1,     // ä¸²å£3 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART3_RX_P15_7,
     UART3_RX_P20_3,
     UART3_RX_P21_6,
-    UART4_RX_P00_12,    // ´®¿Ú4 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART4_RX_P00_12,    // ä¸²å£4 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
 
-    UART5_RX_P00_6,     // ´®¿Ú5 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART5_RX_P00_6,     // ä¸²å£5 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART5_RX_P22_3,
     UART5_RX_P33_4,
 
-    UART6_RX_P22_0,     // ´®¿Ú6 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART6_RX_P22_0,     // ä¸²å£6 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART6_RX_P23_1,
 
-    UART8_RX_P33_6,     // ´®¿Ú8 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART8_RX_P33_6,     // ä¸²å£8 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
 
-    UART9_RX_P20_6,     // ´®¿Ú9 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART9_RX_P20_6,     // ä¸²å£9 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
 
-    UART10_RX_P00_4,    // ´®¿Ú10 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART10_RX_P00_4,    // ä¸²å£10 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
     UART10_RX_P00_8,
     UART10_RX_P13_0,
     UART10_RX_P13_1,
 
-    UART11_RX_P21_2,    // ´®¿Ú11 ½ÓÊÕÒý½Å¿ÉÑ¡·¶Î§
+    UART11_RX_P21_2,    // ä¸²å£11 æŽ¥æ”¶å¼•è„šå¯é€‰èŒƒå›´
 }uart_rx_pin_enum;
 
 
-typedef enum            // Ã¶¾Ù´®¿ÚºÅ ´ËÃ¶¾Ù¶¨Òå²»ÔÊÐíÓÃ»§ÐÞ¸Ä
+typedef enum            // æžšä¸¾ä¸²å£å· æ­¤æžšä¸¾å®šä¹‰ä¸å…è®¸ç”¨æˆ·ä¿®æ”¹
 {
     UART_0,
     UART_1,
@@ -144,14 +144,14 @@ typedef enum            // Ã¶¾Ù´®¿ÚºÅ ´ËÃ¶¾Ù¶¨Òå²»ÔÊÐíÓÃ»§ÐÞ¸Ä
     UART_4,
     UART_5,
     UART_6,
-    UART_7,             // ºËÐÄ°åÃ»ÓÐÒý³ö´®¿Ú7µÄÒý½Å ´Ë´¦½öÓÃ×÷Õ¼Î»
+    UART_7,             // æ ¸å¿ƒæ¿æ²¡æœ‰å¼•å‡ºä¸²å£7çš„å¼•è„š æ­¤å¤„ä»…ç”¨ä½œå ä½
     UART_8,
     UART_9,
     UART_10,
     UART_11,
 }uart_index_enum;
 
-//´´½¨´®¿Úhandle±äÁ¿
+//åˆ›å»ºä¸²å£handleå˜é‡
 extern IfxAsclin_Asc uart0_handle;
 extern IfxAsclin_Asc uart1_handle;
 extern IfxAsclin_Asc uart2_handle;
@@ -164,7 +164,7 @@ extern IfxAsclin_Asc uart9_handle;
 extern IfxAsclin_Asc uart10_handle;
 extern IfxAsclin_Asc uart11_handle;
 
-//====================================================´®¿Ú »ù´¡º¯Êý====================================================
+//====================================================ä¸²å£ åŸºç¡€å‡½æ•°====================================================
 void    uart_write_byte                     (uart_index_enum uartn, const uint8 dat);
 void    uart_write_buffer                   (uart_index_enum uartn, const uint8 *buff, uint32 len);
 void    uart_write_string                   (uart_index_enum uartn, const char *str);
@@ -177,9 +177,9 @@ void    uart_rx_interrupt                   (uart_index_enum uartn, uint32 statu
 
 void    uart_sbus_init                      (uart_index_enum uartn, uint32 baud, uart_tx_pin_enum tx_pin, uart_rx_pin_enum rx_pin);
 void    uart_init                           (uart_index_enum uartn, uint32 baud, uart_tx_pin_enum tx_pin, uart_rx_pin_enum rx_pin);
-//====================================================´®¿Ú »ù´¡º¯Êý====================================================
+//====================================================ä¸²å£ åŸºç¡€å‡½æ•°====================================================
 
-//=================================================¼æÈÝ¾É°æ±¾¿ªÔ´¿â½Ó¿ÚÃû³Æ=================================================
+//=================================================å…¼å®¹æ—§ç‰ˆæœ¬å¼€æºåº“æŽ¥å£åç§°=================================================
 #ifdef  COMPATIBLE_WITH_OLDER_VERSIONS
 #define uart_putchar(uart_n, dat)           (uart_write_byte((uart_n), (dat)))
 #define uart_putbuff(uart_n, buff, len)     (uart_write_buffer((uart_n), (buff), (len)))
@@ -191,6 +191,6 @@ void    uart_init                           (uart_index_enum uartn, uint32 baud,
 #define uart_tx_irq(uart_n, status)         (uart_tx_interrupt((uart_n), (status)))
 #define uart_rx_irq(uart_n, status)         (uart_rx_interrupt((uart_n), (status)))
 #endif
-//=================================================¼æÈÝ¾É°æ±¾¿ªÔ´¿â½Ó¿ÚÃû³Æ=================================================
+//=================================================å…¼å®¹æ—§ç‰ˆæœ¬å¼€æºåº“æŽ¥å£åç§°=================================================
 
 #endif

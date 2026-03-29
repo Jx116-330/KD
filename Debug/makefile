@@ -48,6 +48,7 @@ RM := rm -rf
 -include libraries/infineon_libraries/Configurations/subdir.mk
 -include code/menu/subdir.mk
 -include code/MyKey/subdir.mk
+-include code/MyEncoder/subdir.mk
 -include code/GPS/subdir.mk
 -include code/Beep/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)

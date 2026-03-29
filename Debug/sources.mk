@@ -26,6 +26,7 @@ SECONDARY_SIZE :=
 SUBDIRS := \
 code/Beep \
 code/GPS \
+code/MyEncoder \
 code/MyKey \
 code/menu \
 libraries/infineon_libraries/Configurations \

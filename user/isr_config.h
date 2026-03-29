@@ -1,20 +1,14 @@
 /*********************************************************************************************************************
-* File: isr_config.h
-* Brief: Cleaned header comment to avoid encoding issues.
-* Note: Original logic retained.
+* 文件名称          isr_config.h
+* 说明              中断服务配置头文件
+* 备注              已按 UTF-8 重新整理注释，配置数值未改动
 *********************************************************************************************************************/
 
 #ifndef _isr_config_h
 #define _isr_config_h
 
-
-
-
-
-
-
-#define CCU6_0_CH0_INT_SERVICE  IfxSrc_Tos_cpu0     // ����CCU6_0 PITͨ��0�жϷ������ͣ����ж�����˭��Ӧ���� IfxSrc_Tos_cpu0 IfxSrc_Tos_cpu1 IfxSrc_Tos_dma  ��������Ϊ����ֵ
-#define CCU6_0_CH0_ISR_PRIORITY 50                  // ����CCU6_0 PITͨ��0�ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
+#define CCU6_0_CH0_INT_SERVICE  IfxSrc_Tos_cpu0     // 配置 CCU6_0 PIT 通道 0 的中断服务目标，可选 IfxSrc_Tos_cpu0 / IfxSrc_Tos_cpu1 / IfxSrc_Tos_dma，以下同理
+#define CCU6_0_CH0_ISR_PRIORITY 50                  // 配置 CCU6_0 PIT 通道 0 的中断优先级，范围 1~255，数值越小优先级越高，建议与常用外设中断错开
 
 #define CCU6_0_CH1_INT_SERVICE  IfxSrc_Tos_cpu0
 #define CCU6_0_CH1_ISR_PRIORITY 51
@@ -25,29 +19,25 @@
 #define CCU6_1_CH1_INT_SERVICE  IfxSrc_Tos_cpu0
 #define CCU6_1_CH1_ISR_PRIORITY 53
 
+#define EXTI_CH0_CH4_INT_SERVICE IfxSrc_Tos_cpu0    // 配置 ERU 通道 0 和通道 4 的中断服务目标，以下同理
+#define EXTI_CH0_CH4_INT_PRIO   60                  // 配置 ERU 通道 0 和通道 4 的中断优先级，范围 1~255，数值越小优先级越高
 
+#define EXTI_CH1_CH5_INT_SERVICE IfxSrc_Tos_cpu0    // 配置 ERU 通道 1 和通道 5 的中断服务目标
+#define EXTI_CH1_CH5_INT_PRIO   61                  // 配置 ERU 通道 1 和通道 5 的中断优先级
 
-#define EXTI_CH0_CH4_INT_SERVICE IfxSrc_Tos_cpu0    // ����ERUͨ��0��ͨ��4�жϷ������ͣ����ж�����˭��Ӧ���� IfxSrc_Tos_cpu0 IfxSrc_Tos_cpu1 IfxSrc_Tos_dma  ��������Ϊ����ֵ
-#define EXTI_CH0_CH4_INT_PRIO   60                  // ����ERUͨ��0��ͨ��4�ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
+#define EXTI_CH2_CH6_INT_SERVICE IfxSrc_Tos_dma     // 配置 ERU 通道 2 和通道 6 的中断服务目标
+#define EXTI_CH2_CH6_INT_PRIO   5                   // 配置 ERU 通道 2 和通道 6 的中断优先级，DMA 响应范围通常为 0~127
 
-#define EXTI_CH1_CH5_INT_SERVICE IfxSrc_Tos_cpu0    // ����ERUͨ��1��ͨ��5�жϷ������ͣ�ͬ��
-#define EXTI_CH1_CH5_INT_PRIO   61                  // ����ERUͨ��1��ͨ��5�ж����ȼ� ͬ��
+#define EXTI_CH3_CH7_INT_SERVICE IfxSrc_Tos_cpu0    // 配置 ERU 通道 3 和通道 7 的中断服务目标
+#define EXTI_CH3_CH7_INT_PRIO   62                  // 配置 ERU 通道 3 和通道 7 的中断优先级
 
-#define EXTI_CH2_CH6_INT_SERVICE IfxSrc_Tos_dma     // ����ERUͨ��2��ͨ��6�жϷ������ͣ�ͬ��
-#define EXTI_CH2_CH6_INT_PRIO   5                   // ����ERUͨ��2��ͨ��6�ж����ȼ� �����÷�ΧΪ0-127(DMA��Ӧ)
+#define DMA_INT_SERVICE         IfxSrc_Tos_cpu0     // 配置 DMA 中断服务目标，可选 IfxSrc_Tos_cpu0 / IfxSrc_Tos_cpu1 / IfxSrc_Tos_dma
+#define DMA_INT_PRIO            70                  // 配置 DMA 中断优先级，范围 1~255，数值越小优先级越高
 
-#define EXTI_CH3_CH7_INT_SERVICE IfxSrc_Tos_cpu0    // ����ERUͨ��3��ͨ��7�жϷ������ͣ�ͬ��
-#define EXTI_CH3_CH7_INT_PRIO   62                  // ����ERUͨ��3��ͨ��7�ж����ȼ� ͬ��
-
-
-#define DMA_INT_SERVICE         IfxSrc_Tos_cpu0     // ERU����DMA�жϷ������ͣ����ж�����˭��Ӧ���� IfxSrc_Tos_cpu0 IfxSrc_Tos_cpu1 IfxSrc_Tos_dma  ��������Ϊ����ֵ
-#define DMA_INT_PRIO            70                  // ERU����DMA�ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
-
-
-#define UART0_INT_SERVICE       IfxSrc_Tos_cpu0     // ���崮��0�жϷ������ͣ����ж�����˭��Ӧ���� IfxSrc_Tos_cpu0 IfxSrc_Tos_cpu1 IfxSrc_Tos_dma  ��������Ϊ����ֵ
-#define UART0_TX_INT_PRIO       11                  // ���崮��0�����ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
-#define UART0_RX_INT_PRIO       10                  // ���崮��0�����ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
-#define UART0_ER_INT_PRIO       12                  // ���崮��0�����ж����ȼ� ���ȼ���Χ1-255 Խ�����ȼ�Խ�� ��ƽʱʹ�õĵ�Ƭ����һ��
+#define UART0_INT_SERVICE       IfxSrc_Tos_cpu0     // 配置串口 0 中断服务目标，可选 IfxSrc_Tos_cpu0 / IfxSrc_Tos_cpu1 / IfxSrc_Tos_dma
+#define UART0_TX_INT_PRIO       11                  // 配置串口 0 发送中断优先级，范围 1~255，数值越小优先级越高
+#define UART0_RX_INT_PRIO       10                  // 配置串口 0 接收中断优先级，范围 1~255，数值越小优先级越高
+#define UART0_ER_INT_PRIO       12                  // 配置串口 0 错误中断优先级，范围 1~255，数值越小优先级越高
 
 #define UART1_INT_SERVICE       IfxSrc_Tos_cpu0
 #define UART1_TX_INT_PRIO       13
@@ -89,21 +79,15 @@
 #define UART9_RX_INT_PRIO       35
 #define UART9_ER_INT_PRIO       36
 
-#define UART10_INT_SERVICE       IfxSrc_Tos_cpu0
-#define UART10_TX_INT_PRIO       37
-#define UART10_RX_INT_PRIO       38
-#define UART10_ER_INT_PRIO       39
+#define UART10_INT_SERVICE      IfxSrc_Tos_cpu0
+#define UART10_TX_INT_PRIO      37
+#define UART10_RX_INT_PRIO      38
+#define UART10_ER_INT_PRIO      39
 
-#define UART11_INT_SERVICE       IfxSrc_Tos_cpu0
-#define UART11_TX_INT_PRIO       40
-#define UART11_RX_INT_PRIO       41
-#define UART11_ER_INT_PRIO       42
-
-
-
-
-
-
+#define UART11_INT_SERVICE      IfxSrc_Tos_cpu0
+#define UART11_TX_INT_PRIO      40
+#define UART11_RX_INT_PRIO      41
+#define UART11_ER_INT_PRIO      42
 
 #define CCU6_0_CH0_INT_VECTAB_NUM    (int)CCU6_0_CH0_INT_SERVICE      > 0 ? (int)CCU6_0_CH0_INT_SERVICE    - 1 : (int)CCU6_0_CH0_INT_SERVICE
 #define CCU6_0_CH1_INT_VECTAB_NUM    (int)CCU6_0_CH1_INT_SERVICE      > 0 ? (int)CCU6_0_CH1_INT_SERVICE    - 1 : (int)CCU6_0_CH1_INT_SERVICE
