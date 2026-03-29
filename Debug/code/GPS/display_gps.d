@@ -2,6 +2,8 @@ display_gps.o :	../code/GPS/display_gps.c
 ../code/GPS/display_gps.c :
 display_gps.o :	"E:\\ads\\Seekfree_TC387_Opensource_Library\\code\GPS\display_gps.h"
 "E:\\ads\\Seekfree_TC387_Opensource_Library\\code\GPS\display_gps.h" :
+display_gps.o :	"E:\\ads\\Seekfree_TC387_Opensource_Library\\code\GPS\path_config.h"
+"E:\\ads\\Seekfree_TC387_Opensource_Library\\code\GPS\path_config.h" :
 display_gps.o :	"E:\\ads\\Seekfree_TC387_Opensource_Library\\libraries\\zf_common\zf_common_headfile.h"
 "E:\\ads\\Seekfree_TC387_Opensource_Library\\libraries\\zf_common\zf_common_headfile.h" :
 display_gps.o :	"E:\ZNC\AURIX-Studio-1.10.6\tools\Compilers\Tasking_1.1r8\ctc\include\math.h"

@@ -15,13 +15,10 @@
 #ifndef _PATH_RECORDER_H_
 #define _PATH_RECORDER_H_
 
+#include "path_config.h"
 #include "zf_common_headfile.h"
 #include "zf_device_gnss.h"
 #include "zf_driver_timer.h"
-
-#define MAX_PATH_POINTS          200
-#define MIN_RECORD_DISTANCE      0.5
-#define MIN_RECORD_INTERVAL      100
 
 typedef enum
 {

@@ -10,6 +10,7 @@
 #include "zf_common_headfile.h"
 #include "zf_driver_gpio.h"
 #include "zf_driver_flash.h"
+#include "path_config.h"
 #include "MyKey.h"
 #include "MyEncoder.h"
 
@@ -47,6 +48,25 @@ static uint8 menu_dynamic_clear_enable = 1;
 static uint8 gps_display_mode = 0;
 static char gps_status_hint[64] = "";
 MenuPage *current_page = NULL;
+
+static void ips200_fill_rect(uint16 x_start, uint16 y_start, uint16 x_end, uint16 y_end, uint16 color);
+static void show_string_fit(uint16 x, uint16 y, const char *s);
+static void show_string_fit_width(uint16 x, uint16 y, uint16 max_width, const char *s);
+static void show_string_fit_width_pad(uint16 x, uint16 y, uint16 max_width, const char *s);
+static void gps_enter_view(uint8 mode);
+static void gps_exit_view(void);
+static void gps_draw_page_header(const char *title);
+static void gps_draw_data_page(void);
+static void gps_draw_map_page(void);
+
+static uint8 gps_menu_gnss_ready(void)
+{
+    return ((gnss.state == 1) &&
+            (gnss.satellite_used >= GPS_MIN_SATELLITES) &&
+            (gnss.speed <= MAX_RECORD_SPEED_KPH) &&
+            (gnss.latitude != 0.0) &&
+            (gnss.longitude != 0.0));
+}
 
 /* 设置默认参数，防止首次上电或 Flash 无效时没有有效配置 */
 void params_set_default(void)
@@ -120,79 +140,164 @@ void Init_Load_Params(void)
 }
 
 /* GPS 动态区域绘制：根据模式显示状态信息或轨迹图 */
-static void gps_dynamic_draw(uint16 x, uint16 y, uint16 w, uint16 h)
+static void gps_enter_view(uint8 mode)
+{
+    gps_display_mode = mode;
+    my_key_clear_state(MY_KEY_1);
+    my_key_clear_state(MY_KEY_4);
+    menu_set_dynamic_draw(NULL);
+    menu_set_dynamic_area(0, 0, 0, 0);
+    menu_set_dynamic_clear(0);
+    menu_needs_update = 1;
+    menu_full_redraw = 1;
+}
+
+static void gps_exit_view(void)
+{
+    gps_display_mode = 0;
+    menu_set_dynamic_draw(NULL);
+    menu_set_dynamic_area(0, 0, 0, 0);
+    menu_set_dynamic_clear(0);
+    menu_needs_update = 1;
+    menu_full_redraw = 1;
+}
+
+static void gps_draw_page_header(const char *title)
+{
+    ips200_set_color(RGB565_YELLOW, RGB565_BLACK);
+    show_string_fit(10, 10, title);
+    ips200_draw_line(0, 30, ips200_width_max - 1, 30, RGB565_GRAY);
+    ips200_set_color(RGB565_WHITE, RGB565_BLACK);
+}
+
+static void gps_draw_data_page(void)
 {
     static uint32 last_refresh_ms = 0;
-    static char line0[64] = "GPS menu ready";
-    static char line1[64] = "";
-    static char line2[64] = "";
-    static char line3[64] = "";
-    static char line4[64] = "";
+    char line0[64];
+    char line1[64];
+    char line2[64];
+    char line3[64];
+    char line4[64];
     uint32 now_ms = system_getval_ms();
-    float total_distance = 0.0f;
-    uint32 total_time = 0;
-    float avg_speed = 0.0f;
 
-    (void)h;
-
-    if (gps_display_mode == 2)
+    if (!menu_full_redraw && (now_ms - last_refresh_ms < 200U))
     {
-        if (now_ms - last_refresh_ms >= 700)
-        {
-            last_refresh_ms = now_ms;
-            path_display_set_area(x, y, w, h);
-            path_display_trajectory(RGB565_BLUE);
-            path_display_current_position();
-        }
         return;
     }
 
-    if (now_ms - last_refresh_ms >= 1000)
+    last_refresh_ms = now_ms;
+    if (menu_full_redraw)
     {
-        last_refresh_ms = now_ms;
-
-        if (gps_display_mode == 1)
-        {
-            sprintf(line0, "Fix:%d Sat:%d", (int)gnss.state, (int)gnss.satellite_used);
-            sprintf(line1, "Lat:%.6f", gnss.latitude);
-            sprintf(line2, "Lon:%.6f", gnss.longitude);
-            sprintf(line3, "Speed:%.2f", gnss.speed);
-            if (gps_status_hint[0] != '\0')
-            {
-                sprintf(line4, "%s", gps_status_hint);
-            }
-            else
-            {
-                sprintf(line4, "Pts:%d", path_recorder_get_point_count());
-            }
-        }
-        else
-        {
-            path_recorder_get_stats(&total_distance, &total_time, &avg_speed);
-            sprintf(line0, "GPS menu ready");
-            sprintf(line1, "Pts:%d Dist:%.1f", path_recorder_get_point_count(), total_distance);
-            sprintf(line2, "Time:%lu", (unsigned long)(total_time / 1000));
-            sprintf(line3, "Avg:%.1f", avg_speed);
-            sprintf(line4, "%s", gps_status_hint);
-        }
+        ips200_fill_rect(0, 32, ips200_width_max - 1, ips200_height_max - 1, RGB565_BLACK);
+        gps_draw_page_header("GPS Data");
+        show_string_fit_width(5, (uint16)(ips200_height_max - 20U), (uint16)(ips200_width_max - 10U), "K1 LONG Exit");
     }
 
-    ips200_show_string(x, y, line0);
-    ips200_show_string(x, y + 18, line1);
-    ips200_show_string(x, y + 36, line2);
-    ips200_show_string(x, y + 54, line3);
-    ips200_show_string(x, y + 72, line4);
+    sprintf(line0, "Fix:%d Sat:%d", (int)gnss.state, (int)gnss.satellite_used);
+    sprintf(line1, "Lat:%.6f", gnss.latitude);
+    sprintf(line2, "Lon:%.6f", gnss.longitude);
+    sprintf(line3, "Speed:%.2fkm/h", gnss.speed);
+    if (gps_status_hint[0] != '\0')
+    {
+        sprintf(line4, "%s", gps_status_hint);
+    }
+    else
+    {
+        sprintf(line4, "Pts:%d", path_recorder_get_point_count());
+    }
+
+    show_string_fit_width_pad(10, 60, (uint16)(ips200_width_max - 20U), line0);
+    show_string_fit_width_pad(10, 84, (uint16)(ips200_width_max - 20U), line1);
+    show_string_fit_width_pad(10, 108, (uint16)(ips200_width_max - 20U), line2);
+    show_string_fit_width_pad(10, 132, (uint16)(ips200_width_max - 20U), line3);
+    show_string_fit_width_pad(10, 156, (uint16)(ips200_width_max - 20U), line4);
+    menu_full_redraw = 0;
+}
+
+static void gps_draw_map_page(void)
+{
+    static uint32 last_refresh_ms = 0;
+    uint16 map_x = 5U;
+    uint16 map_y = 85U;
+    uint16 map_w = (uint16)(ips200_width_max - 10U);
+    uint16 map_h;
+    uint32 now_ms = system_getval_ms();
+
+    if (!menu_full_redraw && (now_ms - last_refresh_ms < 800U))
+    {
+        return;
+    }
+
+    last_refresh_ms = now_ms;
+    if (menu_full_redraw)
+    {
+        ips200_fill_rect(0, 32, ips200_width_max - 1, ips200_height_max - 1, RGB565_BLACK);
+        gps_draw_page_header("GPS Map");
+        show_string_fit_width(5, (uint16)(ips200_height_max - 20U), (uint16)(ips200_width_max - 10U), "K1 LONG Exit");
+    }
+
+    if (gps_status_hint[0] != '\0')
+    {
+        show_string_fit_width_pad(10, 36, (uint16)(ips200_width_max - 20U), gps_status_hint);
+    }
+    else
+    {
+        show_string_fit_width_pad(10, 36, (uint16)(ips200_width_max - 20U), "");
+    }
+
+    if (ips200_height_max > 170U)
+    {
+        map_h = (uint16)(ips200_height_max - 170U);
+    }
+    else
+    {
+        map_h = (uint16)(ips200_height_max / 2U);
+    }
+
+    if (map_h < 60U)
+    {
+        map_h = 60U;
+    }
+
+    if ((uint32)map_y + (uint32)map_h > (uint32)(ips200_height_max - 25U))
+    {
+        map_h = (uint16)(ips200_height_max - map_y - 25U);
+    }
+
+    if (map_h < 60U)
+    {
+        map_h = 60U;
+    }
+
+    ips200_fill_rect(0, 32, ips200_width_max - 1U, (uint16)(map_y - 1U), RGB565_BLACK);
+    if (gps_status_hint[0] != '\0')
+    {
+        show_string_fit_width_pad(10, 36, (uint16)(ips200_width_max - 20U), gps_status_hint);
+    }
+    else
+    {
+        show_string_fit_width_pad(10, 36, (uint16)(ips200_width_max - 20U), " ");
+    }
+
+    if (map_w > 2U && map_h > 2U)
+    {
+        ips200_fill_rect((uint16)(map_x + 1U),
+                         (uint16)(map_y + 1U),
+                         (uint16)(map_x + map_w - 2U),
+                         (uint16)(map_y + map_h - 2U),
+                         RGB565_BLACK);
+    }
+    path_display_set_area(map_x, map_y, map_w, map_h);
+    path_display_trajectory(RGB565_BLUE);
+    path_display_current_position();
+    menu_full_redraw = 0;
 }
 
 /* GPS 菜单项：显示当前 GPS 状态数据 */
 static void gps_action_display_data(void)
 {
-    gps_display_mode = 1;
     gps_status_hint[0] = '\0';
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
-    menu_full_redraw = 1;
+    gps_enter_view(1);
 }
 
 /* GPS 菜单项：开始或停止轨迹记录 */
@@ -207,8 +312,7 @@ static void gps_action_toggle_record(void)
     }
     else
     {
-        if ((gnss.state == 1) && (gnss.satellite_used >= 4) &&
-            (gnss.latitude != 0.0) && (gnss.longitude != 0.0))
+        if (gps_menu_gnss_ready())
         {
             if (path_recorder_start())
             {
@@ -225,24 +329,16 @@ static void gps_action_toggle_record(void)
         }
     }
 
-    gps_display_mode = 1;
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
+    gps_display_mode = 0;
     menu_full_redraw = 1;
 }
 
 /* GPS 菜单项：进入轨迹显示模式 */
 static void gps_action_map(void)
 {
-    gps_display_mode = 2;
     sprintf(gps_status_hint, "Track from recorded points");
     path_display_init();
-    path_display_set_area(0, 150, 240, 90);
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
-    menu_full_redraw = 1;
+    gps_enter_view(2);
 }
 
 /* GPS 菜单项：手动保存当前 GPS 点 */
@@ -250,8 +346,7 @@ static void gps_action_save_current_point(void)
 {
     path_point_t point;
 
-    if ((gnss.state == 1) && (gnss.satellite_used >= 4) &&
-        (gnss.latitude != 0.0) && (gnss.longitude != 0.0))
+    if (gps_menu_gnss_ready())
     {
         point.latitude = (float)gnss.latitude;
         point.longitude = (float)gnss.longitude;
@@ -275,10 +370,7 @@ static void gps_action_save_current_point(void)
         sprintf(gps_status_hint, "GPS not ready");
     }
 
-    gps_display_mode = 1;
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
+    gps_display_mode = 0;
     menu_full_redraw = 1;
 }
 
@@ -287,8 +379,7 @@ static void gps_action_current_map(void)
 {
     path_point_t point;
 
-    if ((gnss.state == 1) && (gnss.satellite_used >= 4) &&
-        (gnss.latitude != 0.0) && (gnss.longitude != 0.0))
+    if (gps_menu_gnss_ready())
     {
         point.latitude = (float)gnss.latitude;
         point.longitude = (float)gnss.longitude;
@@ -312,13 +403,8 @@ static void gps_action_current_map(void)
         sprintf(gps_status_hint, "GPS not ready");
     }
 
-    gps_display_mode = 2;
     path_display_init();
-    path_display_set_area(0, 150, 240, 90);
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
-    menu_full_redraw = 1;
+    gps_enter_view(2);
 }
 
 /* GPS 菜单项：清空当前记录点 */
@@ -326,10 +412,7 @@ static void gps_action_clear_points(void)
 {
     path_recorder_clear();
     sprintf(gps_status_hint, "Points cleared");
-    gps_display_mode = 1;
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
+    gps_display_mode = 0;
     menu_full_redraw = 1;
 }
 
@@ -338,18 +421,38 @@ static void gps_action_save_path(void)
 {
     if (path_recorder_get_point_count() > 0)
     {
-        path_recorder_save_to_flash(0);
-        sprintf(gps_status_hint, "Path saved slot 0");
+        if (path_recorder_save_to_flash(0))
+        {
+            sprintf(gps_status_hint, "Path saved slot 0");
+        }
+        else
+        {
+            sprintf(gps_status_hint, "Path save failed");
+        }
     }
     else
     {
         sprintf(gps_status_hint, "No path to save");
     }
-    gps_display_mode = 1;
-    menu_set_dynamic_area(0, 150, 240, 90);
-    menu_set_dynamic_draw(gps_dynamic_draw);
-    menu_set_dynamic_clear(0);
+    gps_display_mode = 0;
     menu_full_redraw = 1;
+}
+
+/* GPS 菜单项：从 Flash 槽位加载轨迹并进入地图显示 */
+static void gps_action_load_path(void)
+{
+    if (path_recorder_load_from_flash(0))
+    {
+        sprintf(gps_status_hint, "Path loaded slot 0");
+        path_display_init();
+        gps_enter_view(2);
+    }
+    else
+    {
+        sprintf(gps_status_hint, "Load path failed");
+        gps_display_mode = 0;
+        menu_full_redraw = 1;
+    }
 }
 
 MenuItem gps_items[] = {
@@ -360,6 +463,7 @@ MenuItem gps_items[] = {
     {"5. Map", gps_action_map, NULL},
     {"6. Clear Points", gps_action_clear_points, NULL},
     {"7. Save Path", gps_action_save_path, NULL},
+    {"8. Load Path", gps_action_load_path, NULL},
 };
 
 MenuPage gps_menu = {
@@ -460,6 +564,65 @@ static void show_string_fit(uint16 x, uint16 y, const char *s)
     ips200_show_string(x, y, buf);
 }
 
+static void show_string_fit_width(uint16 x, uint16 y, uint16 max_width, const char *s)
+{
+    int max_chars;
+    char buf[64];
+    int i = 0;
+
+    if (0U == max_width)
+    {
+        return;
+    }
+
+    max_chars = (int)(max_width / 8U);
+    if (max_chars <= 0)
+    {
+        return;
+    }
+
+    while (i < max_chars && s[i] != '\0' && i < (int)sizeof(buf) - 1)
+    {
+        buf[i] = s[i];
+        i++;
+    }
+    buf[i] = '\0';
+    ips200_show_string(x, y, buf);
+}
+
+static void show_string_fit_width_pad(uint16 x, uint16 y, uint16 max_width, const char *s)
+{
+    int max_chars;
+    char buf[64];
+    int i = 0;
+
+    if (0U == max_width)
+    {
+        return;
+    }
+
+    max_chars = (int)(max_width / 8U);
+    if (max_chars <= 0)
+    {
+        return;
+    }
+
+    while (i < max_chars && s[i] != '\0' && i < (int)sizeof(buf) - 1)
+    {
+        buf[i] = s[i];
+        i++;
+    }
+
+    while (i < max_chars && i < (int)sizeof(buf) - 1)
+    {
+        buf[i] = ' ';
+        i++;
+    }
+
+    buf[i] = '\0';
+    ips200_show_string(x, y, buf);
+}
+
 /* 菜单系统初始化：初始化屏幕、按键、编码器、参数与主菜单状态 */
 void menu_init(void)
 {
@@ -520,6 +683,26 @@ void menu_task(void)
         return;
     }
 
+    if (gps_display_mode != 0)
+    {
+        if (my_key_get_state(MY_KEY_1) == MY_KEY_LONG_PRESS)
+        {
+            my_key_clear_state(MY_KEY_1);
+            gps_exit_view();
+            return;
+        }
+
+        if (1 == gps_display_mode)
+        {
+            gps_draw_data_page();
+        }
+        else if (2 == gps_display_mode)
+        {
+            gps_draw_map_page();
+        }
+        return;
+    }
+
     if (If_Switch_Encoder_Change())
     {
         current_selection -= switch_encoder_change_num;
@@ -544,7 +727,7 @@ void menu_task(void)
         {
             current_page = current_page->parent;
             current_selection = 0;
-            gps_display_mode = 0;
+            gps_exit_view();
             gps_status_hint[0] = '\0';
             menu_set_dynamic_draw(NULL);
             menu_needs_update = 1;
@@ -561,6 +744,18 @@ void menu_task(void)
         if (item->function)
         {
             item->function();
+            if (gps_display_mode != 0)
+            {
+                if (1 == gps_display_mode)
+                {
+                    gps_draw_data_page();
+                }
+                else if (2 == gps_display_mode)
+                {
+                    gps_draw_map_page();
+                }
+                return;
+            }
             menu_full_redraw = 1;
         }
         else if (item->sub_page)
@@ -569,28 +764,13 @@ void menu_task(void)
             {
                 gps_display_mode = 0;
                 gps_status_hint[0] = '\0';
-                menu_set_dynamic_area(0, 150, 240, 90);
-                menu_set_dynamic_draw(gps_dynamic_draw);
+                menu_set_dynamic_area(0, 0, 0, 0);
+                menu_set_dynamic_draw(NULL);
                 menu_set_dynamic_clear(0);
             }
             item->sub_page->parent = current_page;
             current_page = item->sub_page;
             current_selection = 0;
-            menu_needs_update = 1;
-            menu_full_redraw = 1;
-        }
-    }
-
-    if (my_key_get_state(MY_KEY_4) == MY_KEY_SHORT_PRESS)
-    {
-        my_key_clear_state(MY_KEY_4);
-        if (current_page->parent)
-        {
-            current_page = current_page->parent;
-            current_selection = 0;
-            gps_display_mode = 0;
-            gps_status_hint[0] = '\0';
-            menu_set_dynamic_draw(NULL);
             menu_needs_update = 1;
             menu_full_redraw = 1;
         }

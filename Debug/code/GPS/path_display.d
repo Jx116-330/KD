@@ -2,6 +2,8 @@ path_display.o :	../code/GPS/path_display.c
 ../code/GPS/path_display.c :
 path_display.o :	..\code\GPS\path_recorder.h
 ..\code\GPS\path_recorder.h :
+path_display.o :	..\code\GPS\path_config.h
+..\code\GPS\path_config.h :
 path_display.o :	"E:\\ads\\Seekfree_TC387_Opensource_Library\\libraries\\zf_common\zf_common_headfile.h"
 "E:\\ads\\Seekfree_TC387_Opensource_Library\\libraries\\zf_common\zf_common_headfile.h" :
 path_display.o :	"E:\ZNC\AURIX-Studio-1.10.6\tools\Compilers\Tasking_1.1r8\ctc\include\math.h"
